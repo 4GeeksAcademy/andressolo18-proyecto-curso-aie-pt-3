@@ -241,6 +241,8 @@
 
             <p id="aviso-privacidad" class="text-xs text-[#607a95]">TrackFlow tratara tus datos con confidencialidad para contacto comercial, diagnostico operativo y propuesta de servicio.</p>
 
+            <p id="form-success" class="hidden rounded-xl border border-[#8bd3b0] bg-[#e9f9ef] px-4 py-3 text-sm font-semibold text-[#136f3a]" role="status" aria-live="polite">Solicitud enviada con exito. Nuestro equipo te contactara en menos de 24 horas.</p>
+
             <div class="flex flex-wrap gap-3">
               <button type="submit" class="inline-flex items-center justify-center gap-1 rounded-[10px] bg-[#0b7a75] px-[1.1rem] py-[0.8rem] text-[0.95rem] font-bold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(11,122,117,0.25)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f28f3b]">Enviar solicitud</button>
               <button type="reset" class="inline-flex items-center justify-center gap-1 rounded-[10px] border border-[#d9e2ec] bg-white px-[1.1rem] py-[0.8rem] text-[0.95rem] font-bold text-[#102a43] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(11,122,117,0.15)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f28f3b]">Limpiar formulario</button>
@@ -257,6 +259,32 @@
       <small>Soporte comercial: contacto@trackflow.com | +34 900 123 456</small>
     </div>
   </footer>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("contact-form");
+      const successMessage = document.getElementById("form-success");
+
+      if (!form || !successMessage) {
+        return;
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        if (!form.reportValidity()) {
+          successMessage.classList.add("hidden");
+          return;
+        }
+
+        form.reset();
+        successMessage.classList.remove("hidden");
+      });
+
+      form.addEventListener("reset", () => {
+        successMessage.classList.add("hidden");
+      });
+    });
+  </script>
   <script src="./validation.js" defer></script>
 </body>
 </html>

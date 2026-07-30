@@ -77,8 +77,6 @@
         <span>TrackFlow</span>
       </a>
 
-      <a class="rounded-lg border border-[#d9e2ec] bg-white px-2.5 py-1.5 text-sm font-bold text-[#075e5a] outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f28f3b] md:hidden" href="#navegacion" aria-label="Ver navegación">Menú</a>
-
       <nav id="navegacion" aria-label="Navegación principal">
         <ul class="hidden list-none items-center gap-5 p-0 md:flex">
           <li><a class="text-[0.95rem] font-semibold text-[#486581] outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f28f3b]" href="#inicio" aria-current="page">Inicio</a></li>
@@ -86,7 +84,15 @@
           <li><a class="text-[0.95rem] font-semibold text-[#486581] outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f28f3b]" href="#beneficios">Beneficios</a></li>
           <li><a class="text-[0.95rem] font-semibold text-[#486581] outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f28f3b]" href="#contacto">Contacto</a></li>
         </ul>
+        <ul id="menu-mobile" class="absolute left-0 right-0 top-full z-30 mx-4 mt-2 hidden list-none gap-2 rounded-xl border border-[#d9e2ec] bg-white p-3 shadow-card md:hidden">
+          <li><a class="block rounded-lg px-3 py-2 text-[0.95rem] font-semibold text-[#486581] hover:bg-[#f7f4ee] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f28f3b]" href="#inicio">Inicio</a></li>
+          <li><a class="block rounded-lg px-3 py-2 text-[0.95rem] font-semibold text-[#486581] hover:bg-[#f7f4ee] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f28f3b]" href="#servicios">Servicios</a></li>
+          <li><a class="block rounded-lg px-3 py-2 text-[0.95rem] font-semibold text-[#486581] hover:bg-[#f7f4ee] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f28f3b]" href="#beneficios">Beneficios</a></li>
+          <li><a class="block rounded-lg px-3 py-2 text-[0.95rem] font-semibold text-[#486581] hover:bg-[#f7f4ee] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f28f3b]" href="#contacto">Contacto</a></li>
+        </ul>
       </nav>
+
+      <button id="menu-toggle" type="button" class="rounded-lg border border-[#d9e2ec] bg-white px-2.5 py-1.5 text-sm font-bold text-[#075e5a] outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f28f3b] md:hidden" aria-expanded="false" aria-controls="menu-mobile" aria-label="Abrir menú de navegación">Menú</button>
     </div>
   </header>
 
@@ -196,5 +202,44 @@
       <small>Operación en EE. UU. y España con almacenes en Los Ángeles y Zaragoza.</small>
     </div>
   </footer>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggle = document.getElementById("menu-toggle");
+      const mobileMenu = document.getElementById("menu-mobile");
+
+      if (!toggle || !mobileMenu) {
+        return;
+      }
+
+      function setMenuState(isOpen) {
+        mobileMenu.classList.toggle("hidden", !isOpen);
+        toggle.setAttribute("aria-expanded", String(isOpen));
+        toggle.setAttribute("aria-label", isOpen ? "Cerrar menú de navegación" : "Abrir menú de navegación");
+      }
+
+      toggle.addEventListener("click", function () {
+        const isOpen = toggle.getAttribute("aria-expanded") === "true";
+        setMenuState(!isOpen);
+      });
+
+      mobileMenu.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+          setMenuState(false);
+        });
+      });
+
+      document.addEventListener("click", function (event) {
+        if (!mobileMenu.classList.contains("hidden") && !mobileMenu.contains(event.target) && event.target !== toggle) {
+          setMenuState(false);
+        }
+      });
+
+      window.addEventListener("resize", function () {
+        if (window.innerWidth >= 768) {
+          setMenuState(false);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
