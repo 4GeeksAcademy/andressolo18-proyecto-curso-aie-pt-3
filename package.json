@@ -7,6 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
     "dev": "npx http-server . -p 3000 -a 0.0.0.0",
     "start": "npx http-server . -p 3000 -a 0.0.0.0",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/4GeeksAcademy/andressolo18-proyecto-curso-aie-pt-3/issues"
   },
-  "homepage": "https://github.com/4GeeksAcademy/andressolo18-proyecto-curso-aie-pt-3#readme"
+  "homepage": "https://github.com/4GeeksAcademy/andressolo18-proyecto-curso-aie-pt-3#readme",
+  "dependencies": {
+    "typescript": "^7.0.2"
+  }
 }
