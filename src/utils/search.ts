@@ -1,48 +1,44 @@
-/**
- * Búsquedas lineal y binaria sobre colecciones.
- */
+import type { Product, Shipment } from "../types/models";
 
-/** Búsqueda lineal: O(n). Sirve para arrays sin ordenar. */
-export function linearSearch<T>(
-  items: T[],
-  predicate: (item: T) => boolean
-): T | undefined {
-  for (const item of items) {
-    if (predicate(item)) return item;
-  }
-  return undefined;
+/** Busca linealmente un producto por SKU sin distinguir mayúsculas y minúsculas. */
+export function findProductBySKU(products: Product[], sku: string): Product | null {
+	const normalizedSku = sku.toLowerCase();
+
+	for (const product of products) {
+		if (product.sku.toLowerCase() === normalizedSku) return product;
+	}
+
+	return null;
 }
 
-export function linearSearchIndex<T>(
-  items: T[],
-  predicate: (item: T) => boolean
+/** Busca linealmente un envío por su identificador. */
+export function findShipmentById(shipments: Shipment[], id: string): Shipment | null {
+	for (const shipment of shipments) {
+		if (shipment.id === id) return shipment;
+	}
+
+	return null;
+}
+
+/** Busca por dicotomía el índice de un producto con el peso indicado. */
+export function binarySearchProductByWeight(
+	sortedProducts: Product[],
+	targetWeight: number
 ): number {
-  for (let i = 0; i < items.length; i++) {
-    if (predicate(items[i])) return i;
-  }
-  return -1;
-}
+	let low = 0;
+	let high = sortedProducts.length - 1;
 
-/** Búsqueda binaria: O(log n). El array debe estar ordenado ascendentemente por keyFn. */
-export function binarySearch<T>(
-  sortedItems: T[],
-  target: number | string,
-  keyFn: (item: T) => number | string
-): T | undefined {
-  let low = 0;
-  let high = sortedItems.length - 1;
+	while (low <= high) {
+		const middle = Math.floor((low + high) / 2);
+		const weight = sortedProducts[middle].weightKg;
 
-  while (low <= high) {
-    const mid = Math.floor((low + high) / 2);
-    const key = keyFn(sortedItems[mid]);
+		if (weight === targetWeight) return middle;
+		if (weight < targetWeight) {
+			low = middle + 1;
+		} else {
+			high = middle - 1;
+		}
+	}
 
-    if (key === target) return sortedItems[mid];
-    if (key < target) {
-      low = mid + 1;
-    } else {
-      high = mid - 1;
-    }
-  }
-
-  return undefined;
+	return -1;
 }

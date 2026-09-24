@@ -1,58 +1,51 @@
-/**
- * Funciones utilitarias genéricas para trabajar con arrays/colecciones.
- */
+import type {
+	Carrier,
+	Product,
+	ProductCategory,
+	WarehouseLocation,
+} from "../types/models";
 
-export function unique<T>(items: T[]): T[] {
-  return Array.from(new Set(items));
+/** Retorna los productos ubicados en el almacén especificado. */
+export function filterProductsByWarehouse(
+	products: Product[],
+	warehouse: WarehouseLocation
+): Product[] {
+	return products.filter((product) => product.warehouse === warehouse);
 }
 
-export function groupBy<T, K extends string | number>(
-  items: T[],
-  keyFn: (item: T) => K
-): Record<K, T[]> {
-  return items.reduce((acc, item) => {
-    const key = keyFn(item);
-    (acc[key] ??= []).push(item);
-    return acc;
-  }, {} as Record<K, T[]>);
+/** Retorna los productos de la categoría especificada. */
+export function filterProductsByCategory(
+	products: Product[],
+	category: ProductCategory
+): Product[] {
+	return products.filter((product) => product.category === category);
 }
 
-export function sortBy<T>(
-  items: T[],
-  keyFn: (item: T) => number | string,
-  order: "asc" | "desc" = "asc"
-): T[] {
-  const sorted = [...items].sort((a, b) => {
-    const ka = keyFn(a);
-    const kb = keyFn(b);
-    if (ka < kb) return -1;
-    if (ka > kb) return 1;
-    return 0;
-  });
-  return order === "desc" ? sorted.reverse() : sorted;
+/** Retorna los productos cuyo stock está en el umbral mínimo o por debajo. */
+export function filterLowStockProducts(products: Product[]): Product[] {
+	return products.filter(
+		(product) => product.stockQuantity <= product.minStockThreshold
+	);
 }
 
-export function chunk<T>(items: T[], size: number): T[][] {
-  if (size <= 0) throw new Error("size debe ser mayor que 0");
-  const result: T[][] = [];
-  for (let i = 0; i < items.length; i += size) {
-    result.push(items.slice(i, i + size));
-  }
-  return result;
+/** Retorna los productos ordenados por cantidad de stock sin mutar el array original. */
+export function sortProductsByStock(
+	products: Product[],
+	order: "asc" | "desc"
+): Product[] {
+	return [...products].sort((firstProduct, secondProduct) => {
+		const difference = firstProduct.stockQuantity - secondProduct.stockQuantity;
+		return order === "asc" ? difference : -difference;
+	});
 }
 
-export function partition<T>(
-  items: T[],
-  predicate: (item: T) => boolean
-): [T[], T[]] {
-  const pass: T[] = [];
-  const fail: T[] = [];
-  for (const item of items) {
-    (predicate(item) ? pass : fail).push(item);
-  }
-  return [pass, fail];
-}
-
-export function flatten<T>(items: T[][]): T[] {
-  return items.reduce((acc, curr) => acc.concat(curr), [] as T[]);
+/** Retorna los transportistas ordenados por tasa de entrega a tiempo. */
+export function sortCarriersByReliability(
+	carriers: Carrier[],
+	order: "asc" | "desc"
+): Carrier[] {
+	return [...carriers].sort((firstCarrier, secondCarrier) => {
+		const difference = firstCarrier.onTimeRate - secondCarrier.onTimeRate;
+		return order === "asc" ? difference : -difference;
+	});
 }
