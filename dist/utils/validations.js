@@ -1,76 +1,101 @@
-/**
- * Validaciones de negocio para entidades del dominio TrackFlow.
- */
-function result(errors) {
-    return { valid: errors.length === 0, errors };
-}
-export function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
+// Validaciones
+// Valida que los datos de un producto cumplan las reglas de negocio básicas
 export function validateProduct(product) {
-    const errors = [];
-    if (!product.sku.trim())
-        errors.push("El SKU no puede estar vacío");
-    if (!Number.isFinite(product.weightKg) || product.weightKg <= 0 || product.weightKg > 100) {
-        errors.push("El peso debe ser mayor que 0 y menor o igual a 100 kg");
+    const errors = []; // Inicializa la lista de mensajes de error.
+    if (product.sku.trim().length === 0) {
+        errors.push("El SKU es obligatorio."); // Registra la ausencia de SKU.
     }
-    const dimensions = [
-        ["largo", product.dimensions.lengthCm],
-        ["ancho", product.dimensions.widthCm],
-        ["alto", product.dimensions.heightCm],
-    ];
-    for (const [name, value] of dimensions) {
-        if (!Number.isFinite(value) || value <= 0 || value > 200) {
-            errors.push(`La dimensión ${name} debe ser mayor que 0 y menor o igual a 200 cm`);
-        }
+    if (product.name.trim().length === 0) {
+        errors.push("El nombre del producto es obligatorio."); // Registra la ausencia de nombre.
+    }
+    if (!Number.isFinite(product.weightKg) || product.weightKg <= 0) {
+        errors.push("El peso debe ser mayor que cero."); // Registra un peso inválido.
+    }
+    if (!Number.isFinite(product.dimensions.lengthCm) || product.dimensions.lengthCm <= 0) {
+        errors.push("El largo debe ser mayor que cero."); // Registra un largo inválido.
+    }
+    if (!Number.isFinite(product.dimensions.widthCm) || product.dimensions.widthCm <= 0) {
+        errors.push("El ancho debe ser mayor que cero."); // Registra un ancho inválido.
+    }
+    if (!Number.isFinite(product.dimensions.heightCm) || product.dimensions.heightCm <= 0) {
+        errors.push("El alto debe ser mayor que cero."); // Registra un alto inválido.
     }
     if (!Number.isFinite(product.stockQuantity) || product.stockQuantity < 0) {
-        errors.push("La cantidad de stock debe ser mayor o igual a 0");
+        errors.push("La cantidad en stock no puede ser negativa."); // Registra una cantidad de stock inválida.
     }
     if (!Number.isFinite(product.minStockThreshold) || product.minStockThreshold < 0) {
-        errors.push("El umbral mínimo de stock debe ser mayor o igual a 0");
+        errors.push("El umbral mínimo de stock no puede ser negativo."); // Registra un umbral inválido.
     }
     if (!Number.isFinite(product.unitCostUSD) || product.unitCostUSD <= 0) {
-        errors.push("El costo unitario debe ser mayor que 0");
+        errors.push("El costo unitario debe ser mayor que cero."); // Registra un costo unitario inválido.
     }
-    return result(errors);
+    return { valid: errors.length === 0, errors }; // Devuelve el resultado y los errores encontrados.
 }
+// Valida que los datos de un envío cumplan las reglas de negocio básicas
 export function validateShipment(shipment) {
-    const errors = [];
-    if (!Number.isFinite(shipment.quantity) || shipment.quantity <= 0) {
-        errors.push("La cantidad del envío debe ser mayor que 0");
+    const errors = []; // Inicializa la lista de mensajes de error.
+    if (shipment.id.trim().length === 0) {
+        errors.push("El identificador del envío es obligatorio."); // Registra la ausencia del identificador.
     }
-    if (!Number.isFinite(shipment.declaredValueUSD) || shipment.declaredValueUSD <= 0) {
-        errors.push("El valor declarado debe ser mayor que 0");
+    if (shipment.sku.trim().length === 0) {
+        errors.push("El SKU del producto es obligatorio."); // Registra la ausencia del SKU.
+    }
+    if (!Number.isInteger(shipment.quantity) || shipment.quantity <= 0) {
+        errors.push("La cantidad debe ser un número entero mayor que cero."); // Registra una cantidad inválida.
+    }
+    if (shipment.destination.city.trim().length === 0) {
+        errors.push("La ciudad de destino es obligatoria."); // Registra la ausencia de ciudad.
+    }
+    if (shipment.destination.postalCode.trim().length === 0) {
+        errors.push("El código postal de destino es obligatorio."); // Registra la ausencia de código postal.
     }
     if (!Number.isFinite(shipment.destination.distanceKm) || shipment.destination.distanceKm < 0) {
-        errors.push("La distancia debe ser mayor o igual a 0 km");
+        errors.push("La distancia de destino no puede ser negativa."); // Registra una distancia inválida.
     }
-    return result(errors);
+    if (!Number.isFinite(shipment.declaredValueUSD) || shipment.declaredValueUSD < 0) {
+        errors.push("El valor declarado no puede ser negativo."); // Registra un valor declarado inválido.
+    }
+    if (Number.isNaN(shipment.createdAt.getTime())) {
+        errors.push("La fecha de creación no es válida."); // Registra una fecha inválida.
+    }
+    const requiresCarrier = ["Assigned", "In transit", "Delivered"].includes(shipment.status); // Determina si el estado exige un transportista.
+    if (requiresCarrier && shipment.carrier === null) {
+        errors.push("El envío necesita un transportista asignado para su estado actual."); // Registra una asignación faltante.
+    }
+    return { valid: errors.length === 0, errors }; // Devuelve el resultado y los errores encontrados.
 }
+// Valida que los datos de un transportista cumplan las reglas de negocio básicas
 export function validateCarrier(carrier) {
-    const errors = [];
-    if (!carrier.operatesIn.length) {
-        errors.push("El transportista debe operar en al menos un país");
+    const errors = []; // Inicializa la lista de mensajes de error.
+    if (carrier.id.trim().length === 0) {
+        errors.push("El identificador del transportista es obligatorio."); // Registra la ausencia del identificador.
     }
-    const nonNegativeRates = [
-        ["base", carrier.baseRateUSD],
-        ["por kg", carrier.ratePerKgUSD],
-        ["por km", carrier.ratePerKmUSD],
-    ];
-    for (const [name, value] of nonNegativeRates) {
-        if (!Number.isFinite(value) || value < 0) {
-            errors.push(`La tarifa ${name} debe ser mayor o igual a 0`);
-        }
+    if (carrier.name.trim().length === 0) {
+        errors.push("El nombre del transportista es obligatorio."); // Registra la ausencia de nombre.
+    }
+    if (carrier.operatesIn.length === 0) {
+        errors.push("El transportista debe operar en al menos un país."); // Registra la falta de cobertura.
+    }
+    if (!Number.isFinite(carrier.baseRateUSD) || carrier.baseRateUSD < 0) {
+        errors.push("La tarifa base no puede ser negativa."); // Registra una tarifa base inválida.
+    }
+    if (!Number.isFinite(carrier.ratePerKgUSD) || carrier.ratePerKgUSD < 0) {
+        errors.push("La tarifa por kilogramo no puede ser negativa."); // Registra una tarifa por peso inválida.
+    }
+    if (!Number.isFinite(carrier.ratePerKmUSD) || carrier.ratePerKmUSD < 0) {
+        errors.push("La tarifa por kilómetro no puede ser negativa."); // Registra una tarifa por distancia inválida.
     }
     if (!Number.isFinite(carrier.avgDeliveryDays) || carrier.avgDeliveryDays <= 0) {
-        errors.push("El promedio de días de entrega debe ser mayor que 0");
+        errors.push("El tiempo promedio de entrega debe ser mayor que cero."); // Registra un tiempo de entrega inválido.
     }
     if (!Number.isFinite(carrier.onTimeRate) || carrier.onTimeRate < 0 || carrier.onTimeRate > 100) {
-        errors.push("La tasa de entrega a tiempo debe estar entre 0 y 100");
+        errors.push("La tasa de puntualidad debe estar entre 0 y 100."); // Registra una tasa de puntualidad inválida.
     }
     if (!Number.isFinite(carrier.maxWeightKg) || carrier.maxWeightKg <= 0) {
-        errors.push("El peso máximo debe ser mayor que 0");
+        errors.push("El peso máximo debe ser mayor que cero."); // Registra una capacidad de peso inválida.
     }
-    return result(errors);
+    if (carrier.acceptsPriority.length === 0) {
+        errors.push("El transportista debe aceptar al menos una prioridad."); // Registra la falta de prioridades aceptadas.
+    }
+    return { valid: errors.length === 0, errors }; // Devuelve el resultado y los errores encontrados.
 }
