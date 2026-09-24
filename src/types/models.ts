@@ -59,3 +59,33 @@ export type ShipmentStatus =
   | "In transit"
   | "Delivered"
   | "Failed";
+
+  // Transportista (Carrier)
+  // Representa un transportista de entregas con el que TrackFlow trabaja
+  export interface Carrier {
+  id: string; // ID del transportista (ej: "CAR-UPS")
+  name: string; // Nombre del transportista (ej: "UPS")
+  operatesIn: Country[]; // Países donde opera
+  baseRateUSD: number; // Costo base de entrega (USD)
+  ratePerKgUSD: number; // Costo adicional por kg (USD)
+  ratePerKmUSD: number; // Costo adicional por km (USD)
+  avgDeliveryDays: number; // Tiempo promedio de entrega en días
+  onTimeRate: number; // Tasa de entrega a tiempo (0-100)
+  maxWeightKg: number; // Peso máximo de paquete que aceptan
+  handlesFragile: boolean; // Puede manejar ítems frágiles
+  acceptsPriority: ShipmentPriority[]; // Prioridades que soportan
+}
+
+// Movimiento de Inventario (InventoryMovement)
+// Rastrea cambios en el inventario (entrada o salida)
+interface InventoryMovement {
+  id: string; // ID del movimiento
+  sku: string; // SKU del producto
+  warehouse: WarehouseLocation; // Ubicación del almacén
+  type: MovementType; // Entrada o salida
+  quantity: number; // Número de unidades movidas
+  reason: string; // Razón del movimiento
+  timestamp: Date; // Cuándo sucedió
+}
+
+type MovementType = "Inbound" | "Outbound" | "Transfer" | "Adjustment";

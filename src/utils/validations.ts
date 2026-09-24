@@ -2,7 +2,7 @@
  * Validaciones de negocio para entidades del dominio TrackFlow.
  */
 
-import type { Product, Shipment } from "../types/models";
+import type { Carrier, Product, Shipment } from "../types/models";
 
 export interface ValidationResult {
   valid: boolean;
@@ -66,6 +66,40 @@ export function validateShipment(shipment: Shipment): ValidationResult {
 
   if (!Number.isFinite(shipment.destination.distanceKm) || shipment.destination.distanceKm < 0) {
     errors.push("La distancia debe ser mayor o igual a 0 km");
+  }
+
+  return result(errors);
+}
+
+export function validateCarrier(carrier: Carrier): ValidationResult {
+  const errors: string[] = [];
+
+  if (!carrier.operatesIn.length) {
+    errors.push("El transportista debe operar en al menos un país");
+  }
+
+  const nonNegativeRates = [
+    ["base", carrier.baseRateUSD],
+    ["por kg", carrier.ratePerKgUSD],
+    ["por km", carrier.ratePerKmUSD],
+  ] as const;
+
+  for (const [name, value] of nonNegativeRates) {
+    if (!Number.isFinite(value) || value < 0) {
+      errors.push(`La tarifa ${name} debe ser mayor o igual a 0`);
+    }
+  }
+
+  if (!Number.isFinite(carrier.avgDeliveryDays) || carrier.avgDeliveryDays <= 0) {
+    errors.push("El promedio de días de entrega debe ser mayor que 0");
+  }
+
+  if (!Number.isFinite(carrier.onTimeRate) || carrier.onTimeRate < 0 || carrier.onTimeRate > 100) {
+    errors.push("La tasa de entrega a tiempo debe estar entre 0 y 100");
+  }
+
+  if (!Number.isFinite(carrier.maxWeightKg) || carrier.maxWeightKg <= 0) {
+    errors.push("El peso máximo debe ser mayor que 0");
   }
 
   return result(errors);
