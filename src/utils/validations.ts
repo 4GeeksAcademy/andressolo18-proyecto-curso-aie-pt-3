@@ -2,7 +2,7 @@
  * Validaciones de negocio para entidades del dominio TrackFlow.
  */
 
-import type { Order, OrderItem, ReturnRequest } from "../types/models";
+import type { Product, Shipment } from "../types/models";
 
 export interface ValidationResult {
   valid: boolean;
@@ -17,48 +17,56 @@ export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-export function validateOrderItems(items: OrderItem[]): ValidationResult {
+export function validateProduct(product: Product): ValidationResult {
   const errors: string[] = [];
 
-  if (items.length === 0) {
-    errors.push("El pedido debe tener al menos un artículo");
+  if (!product.sku.trim()) errors.push("El SKU no puede estar vacío");
+
+  if (!Number.isFinite(product.weightKg) || product.weightKg <= 0 || product.weightKg > 100) {
+    errors.push("El peso debe ser mayor que 0 y menor o igual a 100 kg");
   }
 
-  for (const item of items) {
-    if (!item.sku) {
-      errors.push("Cada artículo debe tener un SKU");
+  const dimensions = [
+    ["largo", product.dimensions.lengthCm],
+    ["ancho", product.dimensions.widthCm],
+    ["alto", product.dimensions.heightCm],
+  ] as const;
+
+  for (const [name, value] of dimensions) {
+    if (!Number.isFinite(value) || value <= 0 || value > 200) {
+      errors.push(`La dimensión ${name} debe ser mayor que 0 y menor o igual a 200 cm`);
     }
-    if (item.quantity <= 0) {
-      errors.push(`La cantidad para el SKU "${item.sku}" debe ser mayor que 0`);
-    }
+  }
+
+  if (!Number.isFinite(product.stockQuantity) || product.stockQuantity < 0) {
+    errors.push("La cantidad de stock debe ser mayor o igual a 0");
+  }
+
+  if (!Number.isFinite(product.minStockThreshold) || product.minStockThreshold < 0) {
+    errors.push("El umbral mínimo de stock debe ser mayor o igual a 0");
+  }
+
+  if (!Number.isFinite(product.unitCostUSD) || product.unitCostUSD <= 0) {
+    errors.push("El costo unitario debe ser mayor que 0");
   }
 
   return result(errors);
 }
 
-export function validateOrder(order: Order): ValidationResult {
+export function validateShipment(shipment: Shipment): ValidationResult {
   const errors: string[] = [];
 
-  if (!order.customerId) errors.push("El pedido debe tener un cliente asociado");
-  if (!order.warehouseId) errors.push("El pedido debe tener un almacén asociado");
+  if (!Number.isFinite(shipment.quantity) || shipment.quantity <= 0) {
+    errors.push("La cantidad del envío debe ser mayor que 0");
+  }
 
-  const itemsResult = validateOrderItems(order.items);
-  errors.push(...itemsResult.errors);
+  if (!Number.isFinite(shipment.declaredValueUSD) || shipment.declaredValueUSD <= 0) {
+    errors.push("El valor declarado debe ser mayor que 0");
+  }
+
+  if (!Number.isFinite(shipment.destination.distanceKm) || shipment.destination.distanceKm < 0) {
+    errors.push("La distancia debe ser mayor o igual a 0 km");
+  }
 
   return result(errors);
-}
-
-/** Una devolución solo es elegible dentro de la ventana permitida (en días) desde la entrega. */
-export function isReturnEligible(
-  order: Order,
-  returnRequest: ReturnRequest,
-  windowDays: number
-): boolean {
-  if (order.status !== "delivered" || !order.deliveredAt) return false;
-
-  const deliveredAt = new Date(order.deliveredAt).getTime();
-  const requestedAt = new Date(returnRequest.requestedAt).getTime();
-  const diffDays = (requestedAt - deliveredAt) / (1000 * 60 * 60 * 24);
-
-  return diffDays >= 0 && diffDays <= windowDays;
 }

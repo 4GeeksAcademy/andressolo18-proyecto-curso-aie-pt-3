@@ -1,70 +1,61 @@
-/**
- * Tipos e interfaces del dominio TrackFlow (logística y gestión de almacenes).
- */
-
-export type Id = string;
-
-export type Country = "US" | "ES";
-
-export type OrderStatus =
-  | "pending"
-  | "picking"
-  | "packed"
-  | "shipped"
-  | "delivered"
-  | "returned"
-  | "cancelled";
-
-export type ReturnStatus = "requested" | "approved" | "rejected" | "received" | "refunded";
-
-export interface Warehouse {
-  id: Id;
-  name: string;
-  country: Country;
-  city: string;
-}
-
+// Producto (Product)
+// Representa un producto almacenado en los almacenes de TrackFlow
 export interface Product {
-  sku: string;
-  name: string;
-  price: number;
-  weightKg: number;
+  sku: string; // Stock Keeping Unit (ej: "SHOE-BLK-42")
+  name: string; // Nombre del producto
+  category: ProductCategory; // Categoría del producto
+  weightKg: number; // Peso en kilogramos
+  dimensions: Dimensions; // Largo, ancho, alto en cm
+  warehouse: WarehouseLocation; // Almacén actual
+  stockQuantity: number; // Unidades disponibles
+  minStockThreshold: number; // Stock mínimo antes de alerta
+  unitCostUSD: number; // Costo por unidad en USD
+  isFragile: boolean; // Requiere manejo especial
+  status: ProductStatus; // Estado actual
 }
 
-export interface Carrier {
-  id: Id;
-  name: string;
+export interface Dimensions {
+  lengthCm: number;
+  widthCm: number;
+  heightCm: number;
+}
+
+export type ProductCategory =
+  | "Fashion"
+  | "Electronics"
+  | "Cosmetics"
+  | "Home"
+  | "Other";
+export type WarehouseLocation = "Los Angeles" | "Zaragoza";
+export type ProductStatus = "Active" | "Low stock" | "Out of stock" | "Discontinued";
+
+//Envío (Shipment)
+//Representa un pedido de entrega que necesita ser enviado a un cliente
+export interface Shipment {
+  id: string; // ID único de envío (ej: "SH-2024-8821")
+  sku: string; // SKU del producto siendo enviado
+  quantity: number; // Número de unidades
+  origin: WarehouseLocation; // Almacén de origen
+  destination: Destination; // Destino de entrega
+  priority: ShipmentPriority; // Nivel de urgencia
+  declaredValueUSD: number; // Valor declarado para seguro
+  carrier: string | null; // Transportista asignado (null si no asignado)
+  status: ShipmentStatus; // Estado actual
+  createdAt: Date; // Fecha de creación del pedido
+}
+
+export interface Destination {
+  city: string;
   country: Country;
-  costPerKg: number;
+  postalCode: string;
+  distanceKm: number; // Distancia desde el almacén de origen
 }
 
-export interface Customer {
-  id: Id;
-  name: string;
-  country: Country;
-  email: string;
-}
-
-export interface OrderItem {
-  sku: string;
-  quantity: number;
-}
-
-export interface Order {
-  id: Id;
-  customerId: Id;
-  warehouseId: Id;
-  carrierId?: Id;
-  items: OrderItem[];
-  status: OrderStatus;
-  createdAt: string;
-  deliveredAt?: string;
-}
-
-export interface ReturnRequest {
-  id: Id;
-  orderId: Id;
-  reason: string;
-  status: ReturnStatus;
-  requestedAt: string;
-}
+export type Country = "United States" | "Spain";
+export type ShipmentPriority = "Standard" | "Express" | "Same-day";
+export type ShipmentStatus =
+  | "Pending"
+  | "Assigned"
+  | "In transit"
+  | "Delivered"
+  | "Failed";
