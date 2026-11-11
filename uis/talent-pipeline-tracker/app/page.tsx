@@ -1,0 +1,126 @@
+import Link from "next/link";
+import { Suspense } from "react";
+import CandidateList from "./candidates/candidate-list";
+import type { Candidate } from "./candidates/types";
+
+type RecordsResponse = {
+  total: number;
+  limit: number;
+  data: Candidate[];
+};
+
+async function getCandidates(): Promise<Candidate[]> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) throw new Error("Falta NEXT_PUBLIC_API_URL");
+
+  const endpoint = `${apiUrl.replace(/\/$/, "")}/records`;
+  const loadPage = async (page: number, limit = 100) => {
+    const url = new URL(endpoint);
+    url.searchParams.set("page", String(page));
+    url.searchParams.set("limit", String(limit));
+
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("No se pudieron cargar las candidaturas");
+    return (await response.json()) as RecordsResponse;
+  };
+
+  const firstPage = await loadPage(1);
+  const pageCount = Math.ceil(firstPage.total / firstPage.limit);
+  const otherPages = await Promise.all(
+    Array.from({ length: Math.max(0, pageCount - 1) }, (_, index) =>
+      loadPage(index + 2, firstPage.limit),
+    ),
+  );
+
+  return [firstPage, ...otherPages].flatMap((page) => page.data);
+}
+
+export default async function Home() {
+  let candidates: Candidate[];
+
+  try {
+    candidates = await getCandidates();
+    candidates.sort(
+      (first, second) =>
+        Date.parse(second.applied_at) - Date.parse(first.applied_at),
+    );
+  } catch {
+    return (
+      <main className="page-shell">
+        <section className="error-state" aria-live="polite">
+          <span className="eyebrow">Talent pipeline</span>
+          <h1>No se pudieron cargar las candidaturas</h1>
+          <p>Comprueba la conexión e inténtalo de nuevo.</p>
+          <Link className="retry-link" href="/">
+            Volver a intentar
+          </Link>
+        </section>
+      </main>
+    );
+  }
+
+  const inProgressCount = candidates.filter(
+    (candidate) => candidate.status === "in_progress",
+  ).length;
+  const receivedCount = candidates.filter(
+    (candidate) => candidate.status === "received",
+  ).length;
+  const discardedCount = candidates.filter(
+    (candidate) => candidate.status === "discarded",
+  ).length;
+
+  return (
+    <main className="page-shell">
+      <header className="topbar">
+        <Link className="brand" href="/" aria-label="Talent pipeline, inicio">
+          <span className="brand-mark">T</span>
+          <span>talent<span className="brand-light">/</span>pipeline</span>
+        </Link>
+        <span className="workspace-label">Panel de selección</span>
+      </header>
+
+      <section className="content">
+        <div className="page-heading">
+          <div>
+            <p className="eyebrow">Equipo de talento</p>
+            <h1>Candidaturas</h1>
+            <p className="page-description">
+              Revisa y sigue el progreso de cada perfil.
+            </p>
+          </div>
+          <div className="updated-indicator" role="status">
+            <span className="live-dot" />
+            {candidates.length} candidaturas cargadas
+          </div>
+        </div>
+
+        <section className="overview" aria-label="Resumen de candidaturas">
+          <div className="metric metric-total">
+            <span className="metric-label">Total de perfiles</span>
+            <strong>{candidates.length}</strong>
+            <span className="metric-note">en la base de talento</span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">En proceso</span>
+            <strong>{inProgressCount}</strong>
+            <span className="metric-note">en evaluación activa</span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Por revisar</span>
+            <strong>{receivedCount}</strong>
+            <span className="metric-note">recién recibidas</span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Descartadas</span>
+            <strong>{discardedCount}</strong>
+            <span className="metric-note">cerradas</span>
+          </div>
+        </section>
+
+        <Suspense fallback={<div className="list-loading" role="status">Preparando filtros...</div>}>
+          <CandidateList candidates={candidates} />
+        </Suspense>
+      </section>
+    </main>
+  );
+}
