@@ -42,8 +42,8 @@ export default async function Home() {
     return (
       <main className="page-shell">
         <section className="error-state" aria-live="polite">
-          <span className="eyebrow">Talent pipeline</span>
-          <h1>No se pudieron cargar las candidaturas</h1>
+          <span className="eyebrow">TrackFlow</span>
+          <h1>No se pudieron cargar los perfiles</h1>
           <p>Comprueba la conexión e inténtalo de nuevo.</p>
           <Link className="retry-link" href="/">
             Volver a intentar
@@ -66,20 +66,20 @@ export default async function Home() {
   return (
     <main className="page-shell">
       <header className="topbar">
-        <Link className="brand" href="/" aria-label="Talent pipeline, inicio">
+        <Link className="brand" href="/" aria-label="TrackFlow, Gestión de talento">
           <span className="brand-mark">T</span>
-          <span>talent<span className="brand-light">/</span>pipeline</span>
+          <span>track<span className="brand-light">/</span>flow</span>
         </Link>
-        <span className="workspace-label">Panel de selección</span>
+        <span className="workspace-label">Gestión de Talento</span>
       </header>
 
       <section className="content">
         <div className="page-heading">
           <div>
-            <p className="eyebrow">Equipo de talento</p>
-            <h1>Candidaturas</h1>
+            <p className="eyebrow">Equipo TrackFlow</p>
+            <h1>Perfiles de Talento</h1>
             <p className="page-description">
-              Revisa y sigue el progreso de cada perfil.
+              Revisa y gestiona el progreso de cada candidato en el pipeline.
             </p>
           </div>
           <div className="updated-indicator" role="status">
@@ -88,26 +88,26 @@ export default async function Home() {
           </div>
         </div>
 
-        <section className="overview" aria-label="Resumen de candidaturas">
+        <section className="overview" aria-label="Resumen de perfiles">
           <div className="metric metric-total">
             <span className="metric-label">Total de perfiles</span>
             <strong>{candidates.length}</strong>
             <span className="metric-note">en la base de talento</span>
           </div>
           <div className="metric">
-            <span className="metric-label">En proceso</span>
+            <span className="metric-label">En evaluación</span>
             <strong>{inProgressCount}</strong>
-            <span className="metric-note">en evaluación activa</span>
+            <span className="metric-note">en proceso de selección</span>
           </div>
           <div className="metric">
             <span className="metric-label">Por revisar</span>
             <strong>{receivedCount}</strong>
-            <span className="metric-note">recién recibidas</span>
+            <span className="metric-note">nuevos candidatos</span>
           </div>
           <div className="metric">
-            <span className="metric-label">Descartadas</span>
+            <span className="metric-label">No seleccionados</span>
             <strong>{discardedCount}</strong>
-            <span className="metric-note">cerradas</span>
+            <span className="metric-note">descartados</span>
           </div>
         </section>
 

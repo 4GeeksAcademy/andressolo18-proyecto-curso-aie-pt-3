@@ -46,15 +46,15 @@ export default async function CandidateDetail({
     return (
       <main className="page-shell">
         <header className="topbar">
-          <Link className="brand" href="/" aria-label="Talent pipeline, inicio">
+          <Link className="brand" href="/" aria-label="TrackFlow, Gestión de talento">
             <span className="brand-mark">T</span>
-            <span>talent<span className="brand-light">/</span>pipeline</span>
+            <span>track<span className="brand-light">/</span>flow</span>
           </Link>
-          <span className="workspace-label">Panel de selección</span>
+          <span className="workspace-label">Gestión de Talento</span>
         </header>
         <section className="error-state detail-error" aria-live="polite">
-          <span className="eyebrow">Talent pipeline</span>
-          <h1>No se pudo cargar la candidatura</h1>
+          <span className="eyebrow">TrackFlow</span>
+          <h1>No se pudo cargar el perfil</h1>
           <p>Comprueba la conexión e inténtalo de nuevo.</p>
           <Link className="retry-link" href={`/candidates/${encodeURIComponent(id)}`} prefetch={false}>
             Volver a intentar
@@ -77,15 +77,15 @@ export default async function CandidateDetail({
       </header>
 
       <section className="content">
-        <Link className="detail-back" href="/">Volver a candidaturas</Link>
+        <Link className="detail-back" href="/">Volver a perfiles</Link>
         {query.updated === "1" && (
           <p className="mutation-feedback" role="status">
-            Los datos de la candidatura se actualizaron correctamente.
+            El perfil se actualizó correctamente.
           </p>
         )}
         <div className="detail-hero">
           <div>
-            <p className="eyebrow">Perfil de candidatura</p>
+            <p className="eyebrow">Perfil de candidato</p>
             <h1>{candidate.full_name}</h1>
             <p className="detail-position">{candidate.position}</p>
             <code className="detail-id">ID {candidate.id}</code>

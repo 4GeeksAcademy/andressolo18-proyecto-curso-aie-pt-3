@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Candidaturas | Talent Pipeline",
-  description: "Seguimiento de candidaturas y perfiles de talento.",
+  title: "Gestión de Talento | TrackFlow",
+  description: "Sistema interno de TrackFlow para seguimiento de candidatos y perfiles de talento.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

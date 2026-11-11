@@ -74,11 +74,11 @@ export default function CandidateForm({
     const experience = Number(form.experience_years);
 
     if (!fullName || !email || !phone || !position) {
-      setFeedback({ type: "error", message: "Completa todos los campos obligatorios." });
+      setFeedback({ type: "error", message: "Rellena todos los campos requeridos para continuar." });
       return;
     }
     if (!Number.isFinite(experience) || experience < 0) {
-      setFeedback({ type: "error", message: "Indica años de experiencia válidos." });
+      setFeedback({ type: "error", message: "Por favor, indica años de experiencia válidos." });
       return;
     }
 
@@ -114,7 +114,7 @@ export default function CandidateForm({
     } catch (requestError) {
       setFeedback({
         type: "error",
-        message: requestError instanceof Error ? requestError.message : "No se pudo guardar la candidatura.",
+        message: requestError instanceof Error ? requestError.message : "No se pudo guardar el perfil. Inténtalo de nuevo.",
       });
     } finally {
       setSubmitting(false);
@@ -216,7 +216,7 @@ export default function CandidateForm({
           {submitting
             ? "Guardando..."
             : mode === "create"
-              ? "Registrar candidatura"
+              ? "Añadir perfil"
               : "Guardar cambios"}
         </button>
       </div>
