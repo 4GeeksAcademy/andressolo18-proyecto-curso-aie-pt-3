@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import CandidateForm from "../../candidate-form";
-import type { Candidate } from "../../types";
+import CandidateForm from "@/components/candidates/candidate-form";
+import type { CandidateResponse } from "@/types/candidate";
 
-async function getCandidate(id: string): Promise<Candidate | null> {
+async function getCandidate(id: string): Promise<CandidateResponse | null> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) throw new Error("Falta configurar la URL de la API.");
 
@@ -13,7 +13,7 @@ async function getCandidate(id: string): Promise<Candidate | null> {
   );
   if (response.status === 404) return null;
   if (!response.ok) throw new Error("No se pudo cargar la candidatura.");
-  return (await response.json()) as Candidate;
+  return (await response.json()) as CandidateResponse;
 }
 
 export default async function EditCandidatePage({
@@ -22,7 +22,7 @@ export default async function EditCandidatePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  let candidate: Candidate | null;
+  let candidate: CandidateResponse | null;
 
   try {
     candidate = await getCandidate(id);

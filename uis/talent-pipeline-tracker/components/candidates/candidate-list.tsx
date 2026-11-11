@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import type { Candidate } from "./types";
+import type { Candidate } from "@/types/candidate";
 
 const statusLabels: Record<string, string> = {
   received: "Recibida",
@@ -39,6 +39,7 @@ export default function CandidateList({ candidates }: { candidates: Candidate[] 
   const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const created = searchParams.get("created") === "1";
+  const createdCandidateId = searchParams.get("candidateId");
   const statusFilter = searchParams.get("status") ?? "all";
   const stageFilter = searchParams.get("stage") ?? "all";
   const normalizedSearch = search.trim().toLocaleLowerCase("es");
@@ -86,6 +87,9 @@ export default function CandidateList({ candidates }: { candidates: Candidate[] 
         {created && (
           <p className="mutation-feedback" role="status">
             Candidatura registrada. El listado se actualizó.
+            {createdCandidateId && (
+              <> <Link href={`/candidates/${encodeURIComponent(createdCandidateId)}`}>Ver perfil</Link></>
+            )}
           </p>
         )}
 

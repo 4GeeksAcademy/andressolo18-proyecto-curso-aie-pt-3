@@ -1,5 +1,5 @@
 import Link from "next/link";
-import CandidateForm from "../candidate-form";
+import CandidateForm from "@/components/candidates/candidate-form";
 
 export default function NewCandidatePage() {
   return (

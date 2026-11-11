@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { apiErrorMessage, recordsApiUrl } from "./api";
-import type { CandidateNote } from "./types";
+import { apiErrorMessage, recordsApiUrl } from "@/lib/api";
+import type {
+  CandidateMutationResponse,
+  CandidateNote,
+  CandidateNoteCreateRequest,
+  CandidateNotesResponse,
+  CandidatePatchRequest,
+} from "@/types/candidate";
 
 const statusOptions = [
   ["received", "Recibida"],
@@ -23,7 +29,7 @@ async function getNotes(recordId: string, signal?: AbortSignal) {
     signal,
   });
   if (!response.ok) throw new Error("No se pudieron cargar las notas.");
-  const result = (await response.json()) as { data: CandidateNote[] };
+  const result = (await response.json()) as CandidateNotesResponse;
   return result.data;
 }
 
@@ -68,10 +74,11 @@ export function CandidateNotes({ recordId }: { recordId: string }) {
     setSaving(true);
     setError(null);
     try {
+      const payload: CandidateNoteCreateRequest = { content: noteContent };
       const response = await fetch(recordsApiUrl(`records/${recordId}/notes`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: noteContent }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error(await apiErrorMessage(response));
 
@@ -182,14 +189,17 @@ export function CandidateStatusControls({
     setUpdateFeedback(null);
     setError(null);
     try {
+      const payload: CandidatePatchRequest =
+        field === "status" ? { status: value } : { stage: value };
       const response = await fetch(recordsApiUrl(`records/${recordId}`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: value }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error(await apiErrorMessage(response));
-      if (field === "status") setStatus(value);
-      else setStage(value);
+      const updatedCandidate = (await response.json()) as CandidateMutationResponse;
+      setStatus(updatedCandidate.status);
+      setStage(updatedCandidate.stage);
       setUpdateFeedback(field === "status" ? "Estado actualizado." : "Etapa actualizada.");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "No se pudo actualizar el perfil.");

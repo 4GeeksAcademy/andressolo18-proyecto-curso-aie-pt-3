@@ -3,12 +3,17 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { apiErrorMessage, recordsApiUrl } from "./api";
-import type { Candidate, CandidateFormValues } from "./types";
+import { apiErrorMessage, recordsApiUrl } from "@/lib/api";
+import type {
+  Candidate,
+  CandidateCreateRequest,
+  CandidateMutationResponse,
+  CandidateUpdateRequest,
+} from "@/types/candidate";
 
 type FormMode = "create" | "edit";
 type FormState = Omit<
-  CandidateFormValues,
+  CandidateCreateRequest,
   "experience_years" | "phone" | "linkedin_url" | "cv_url"
 > & {
   experience_years: string;
@@ -77,7 +82,7 @@ export default function CandidateForm({
       return;
     }
 
-    const payload: CandidateFormValues = {
+    const payload: CandidateCreateRequest | CandidateUpdateRequest = {
       full_name: fullName,
       email,
       phone,
@@ -99,11 +104,12 @@ export default function CandidateForm({
         },
       );
       if (!response.ok) throw new Error(await apiErrorMessage(response));
+      const savedCandidate = (await response.json()) as CandidateMutationResponse;
 
       if (mode === "create") {
-        router.replace("/?created=1");
+        router.replace(`/?created=1&candidateId=${encodeURIComponent(savedCandidate.id)}`);
       } else {
-        router.replace(`/candidates/${candidate?.id}?updated=1`);
+        router.replace(`/candidates/${savedCandidate.id}?updated=1`);
       }
     } catch (requestError) {
       setFeedback({

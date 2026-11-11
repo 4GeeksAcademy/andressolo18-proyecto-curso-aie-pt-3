@@ -1,13 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import CandidateList from "./candidates/candidate-list";
-import type { Candidate } from "./candidates/types";
-
-type RecordsResponse = {
-  total: number;
-  limit: number;
-  data: Candidate[];
-};
+import CandidateList from "@/components/candidates/candidate-list";
+import type { Candidate, CandidateListResponse } from "@/types/candidate";
 
 async function getCandidates(): Promise<Candidate[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -21,7 +15,7 @@ async function getCandidates(): Promise<Candidate[]> {
 
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error("No se pudieron cargar las candidaturas");
-    return (await response.json()) as RecordsResponse;
+    return (await response.json()) as CandidateListResponse;
   };
 
   const firstPage = await loadPage(1);

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CandidateNotes, CandidateStatusControls } from "../candidate-interactions";
-import type { Candidate } from "../types";
+import { CandidateNotes, CandidateStatusControls } from "@/components/candidates/candidate-interactions";
+import type { CandidateResponse } from "@/types/candidate";
 
 const statusLabels: Record<string, string> = {
   received: "Recibida",
@@ -9,7 +9,7 @@ const statusLabels: Record<string, string> = {
   discarded: "Descartada",
 };
 
-async function getCandidate(id: string): Promise<Candidate | null> {
+async function getCandidate(id: string): Promise<CandidateResponse | null> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) throw new Error("Falta NEXT_PUBLIC_API_URL");
 
@@ -20,7 +20,7 @@ async function getCandidate(id: string): Promise<Candidate | null> {
 
   if (response.status === 404) return null;
   if (!response.ok) throw new Error("No se pudo cargar la candidatura");
-  return (await response.json()) as Candidate;
+  return (await response.json()) as CandidateResponse;
 }
 
 function formatDate(value: string) {
@@ -33,9 +33,12 @@ function formatDate(value: string) {
 export default async function CandidateDetail({
   params,
   searchParams,
-}: PageProps<"/candidates/[id]">) {
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ updated?: string }>;
+}) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  let candidate: Candidate | null;
+  let candidate: CandidateResponse | null;
 
   try {
     candidate = await getCandidate(id);
